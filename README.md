@@ -17,7 +17,7 @@ moving on to the next generated puzzle. It repeats this process until the user r
 ## How to Run
 To run this project:
 * Navigate to https://www.coolmathgames.com/0-word-search
-* Ensure game is open and visible on a secondary monitor
+* Ensure requirements listed in requirements.txt are satisfied
 * From within the project folder, run the command 
 ```
 $ python main.py
@@ -26,6 +26,9 @@ $ python main.py
 
 ### Note
 While this bot was built based on the game's 'Hard' difficulty conditions, it should be equally effective when set for 'Easy', 'Medium', or 'Hard' difficulty. The bot, however, is not designed to solve puzzles in 'Maniac' difficulty due to the added time constraint and hidden word bank.
+
+### Update
+As of January 2024, this project has been modified to limit the need for hardcoded data by generalizing code to function for any screen dimensions. Therefore, this program should be able to be run on any computer that has the requirements.txt contents fulfilled and can display the full game window clearly while it is running. However, this shift puts some responsibility on the user that was not present previously to follow the instructions printed in the terminal at the start of running the program.
 
 
 ## Development Process
@@ -62,4 +65,4 @@ There are two identified cases where this program will fail to successfully comp
 * Since the program searches for the first occurrence it can find of a word bank word, if said word occurs more than once in the puzzle and the game's intended solution for it is not the most upper left instance of the word, the program will attempt to select the wrong instance and the word will not be marked as found.
 
 
-max: 32 puzzles in row - had to stop# word-search-bot
+max: 32 puzzles in row - had to stop"# wordsearch-bot" 

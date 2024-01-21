@@ -11,11 +11,12 @@ import time
 import copy
 from extractData import *
 
-pyt.pytesseract.tesseract_cmd = pyt.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract'
+# pyt.pytesseract.tesseract_cmd = "C:\\Users\\chloe\\AppData\\Local\\Programs\\Tesseract-OCR"
+pyt.pytesseract.tesseract_cmd = r'Tesseract-OCR\tesseract'
 
 def preprocessBank(gray):
     im_h, im_w = gray.shape  
-    col_x = 580
+    col_x = int(im_w*0.72)
 
     bw = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY, 27, 2)
     kernel = np.ones((1, 1), np.uint8)
@@ -24,14 +25,15 @@ def preprocessBank(gray):
     erode = cv2.erode(dilate, kernel, iterations=1)
     morph = cv2.morphologyEx(erode, cv2.MORPH_CLOSE, kernel)
     no_noise = cv2.medianBlur(morph, 3)
-    roi_col = no_noise[40:im_h, col_x:im_w]
+    roi_col = no_noise[int(im_h*0.1):int(im_h), int(col_x):int(im_w)]
 
     cv2.imwrite("temp/roi_col.jpg", roi_col)
     return roi_col
 
 def preprocessGrid(gray):
-    grid_tcorner = (105, 105)
-    grid_bcorner = (515, 515)
+    im_h, im_w = gray.shape
+    grid_tcorner = (int(im_w*0.13), int(im_w*0.14))
+    grid_bcorner = (int(im_h*0.83), int(im_h*0.85))
 
     roi_main = gray[grid_tcorner[1]:grid_bcorner[1], grid_tcorner[0]:grid_bcorner[0]]
     bw = cv2.threshold(roi_main, 127, 255, cv2.THRESH_BINARY)[1]
@@ -179,11 +181,11 @@ def fillInBlanks(roi_main, word_grid):
     return word_grid
 
 def preprocessCheckedBank(): 
-    col_x = 580
 
     image = cv2.imread("temp/notdone.jpg")
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     im_h, im_w = gray.shape 
+    col_x = int(im_w*0.72)
     bw = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)[1]
     kernel = np.ones((1, 1), np.uint8)
     dilate = cv2.dilate(bw, kernel, iterations=1)

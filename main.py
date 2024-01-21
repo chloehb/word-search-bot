@@ -9,8 +9,9 @@ import numpy as np
 import math
 import time
 import copy
+import mouse
 from extractData import *
-from notfound import *
+from notFound import *
  
 def findWordInGrid(chars, word_grid):
     # iterate through grid and check for word in all directions
@@ -130,7 +131,7 @@ def findAllWords(adj_grid, word_bank):
                 print("Error: \'{}\' not found in grid".format(word))
                 if count == 0:
                     words_missing.append(word)
-                    print("words missing: " + str(words_missing))
+                    print("Words missing: " + str(words_missing))
                 for i in range(0, len(chars)):
                     copy_word = [c for c in str(word)]
                     copy_word[i] = ''
@@ -188,17 +189,34 @@ def selectWords(left, top, grid_corner, found_coords):
         pyautogui.dragTo(int(found_coords[word][1][0]+ left + grid_corner[0]), int(found_coords[word][1][1] + top + grid_corner[1]), 1, button='left')
         time.sleep(.5)
 
+        
 if __name__ == '__main__':
-
-    while pyautogui.locateOnScreen('gamescreen.jpg', grayscale=True, confidence=0.85) == None:
-        print('Check that the game is open and completely visible on screen.')
-        time.sleep(2)
-    left, top, width, height = findGameScreen('gamescreen.jpg')
+    # get coords of gamescreen
+    print("Welcome to Chloe's Cool Math Games Word Search Bot\n")
+    print("Please follow this link: https://www.coolmathgames.com/0-word-search")
+    input("Ensure game is open and visible on a primary monitor, then press Enter to continue.\n")
+    print("On your screen, click on the top, left corner of the orangish yellow game window.")
+    while True:
+        if mouse.is_pressed("left"):
+            break
+    left, top = mouse.get_position()
+    time.sleep(0.75)
+    print("Now click the bottom, right corner of that window.\n")
+    while True:
+        if mouse.is_pressed("left"):
+            break
+    right, bottom = mouse.get_position()
+    width = right - left
+    height = bottom - top
+    pyautogui.screenshot('temp/gamescreen.jpg', [left, top, width, height])
 
     stop = False
-    games_played = 0
-    play_btn = (400, 531)
 
+    games_played = 0
+    play_btn = (width*0.5, height*0.85)
+
+    time.sleep(0.75)
+    print("Thank you!\n")
     print("Bot session started.")
     print("------------------------------------------------------------------------------------------------")
 
@@ -230,22 +248,19 @@ if __name__ == '__main__':
 
         # input solutions to game interface
         selectWords(left, top, grid_corner, found_coords)
-        notdone = False
-        timeout = time.time() + 5
-        while pyautogui.locateOnScreen('solved.jpg', grayscale=True, confidence=0.85) == None:
-            time.sleep(1)
-            if time.time() > timeout:
-                notdone = True
-                break
 
+        notdone = False
         fail = False
+        active_words = []
+        pyautogui.screenshot('temp/notdone.jpg', [left, top, width, height])
+        time.sleep(1)
+        found_actives = {}
+        found_actives = findActiveWords(adj_grid)
+
+        if len(found_actives) > 0:
+            notdone = True
+
         if notdone:
-            active_words = []
-            # find missing words
-            pyautogui.screenshot('temp/notdone.jpg', [left, top, width, height])
-            time.sleep(1)
-            found_actives = {}
-            found_actives = findActiveWords(adj_grid)
                         
             cell_h = int(grid_h / 10)
             cell_w = int(grid_w /10)
@@ -255,12 +270,14 @@ if __name__ == '__main__':
             # input solutions to game interface
             selectWords(left, top, grid_corner, active_coords)
 
-            timeout = time.time() + 5
-            while pyautogui.locateOnScreen('solved.jpg', grayscale=True, confidence=0.85) == None:
-                time.sleep(1)
-                if time.time() > timeout:
-                    fail = True
-                    break
+            active_words = []
+            pyautogui.screenshot('temp/notdone.jpg', [left, top, width, height])
+            time.sleep(1)
+            found_actives = {}
+            found_actives = findActiveWords(adj_grid)
+
+            if len(found_actives) > 0:
+                fail = True
 
         if fail:
             print("------------------------------------------------------------------------------------------------")
@@ -273,7 +290,7 @@ if __name__ == '__main__':
             stop = True
             break  
         
-        l_s, t_s, w_s, h_s = findGameScreen('solved.jpg')
+
         games_played += 1
 
         timeout = time.time() + 5
@@ -287,9 +304,9 @@ if __name__ == '__main__':
                     print(str(games_played) + ' puzzle solved.')
                 else:
                     print(str(games_played) + ' puzzles solved.')
-                pyautogui.click(x=(97 + l_s), y=(112 + t_s))
+                pyautogui.click(x=(left + width*0.35), y=(top + height*0.6))
                 break  
             if time.time() > timeout:
                 print('\nNew puzzle...\n')
-                pyautogui.click(x=(317 + l_s), y=(110 + t_s))
+                pyautogui.click(x=(left + width*0.6), y=(top + height*0.6))
                 break
